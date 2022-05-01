@@ -1,11 +1,11 @@
 from telethon import TelegramClient, events
 from decouple import config
 
-CHANNEL = config("CHANNEL")
 API_ID = config("API_ID")
 API_HASH = config("API_HASH")
 BOT_TOKEN = config("BOT_TOKEN")
-BOT_TARGET_CHANNEL = config("BOT_TARGET_CHANNEL")
+SOURCE_CHANNEL = config("SOURCE_CHANNEL")
+TARGET_CHANNEL = config("TARGET_CHANNEL")
 KEYWORDS = config("KEYWORDS", default = "").split(",")
 
 client = TelegramClient('anon', API_ID, API_HASH).start()
@@ -20,19 +20,21 @@ async def get_dialog_id(dialog_name):
 
 async def handler(event):
     if all(keyword in event.raw_text for keyword in KEYWORDS):
-        await bot.send_message(BOT_TARGET_CHANNEL, event.message)
+        await bot.send_message(TARGET_CHANNEL, event.message)
 
 async def main():
     print(f"API_ID: {API_ID}")
     print(f"API_HASH: {API_HASH}")
 
-    print(f"Channel name: {CHANNEL}")
+    print(f"SOURCE_CHANNEL: {SOURCE_CHANNEL}")
 
-    channel_chat_id = await get_dialog_id(CHANNEL)
-    print(f"Channel chat id: {channel_chat_id}")
+    SOURCE_CHANNEL_CHAT_ID = await get_dialog_id(SOURCE_CHANNEL)
+    print(f"SOURCE_CHANNEL_CHAT_ID: {SOURCE_CHANNEL_CHAT_ID}")
 
-    print(f"Keywords: {', '.join(KEYWORDS)}")
-    client.add_event_handler(handler, events.NewMessage(chats=[channel_chat_id]))
+    print(f"TARGET_CHANNEL: {TARGET_CHANNEL}")
+
+    print(f"KEYWORDS: {', '.join(KEYWORDS)}")
+    client.add_event_handler(handler, events.NewMessage(chats=[SOURCE_CHANNEL_CHAT_ID]))
 
 client.loop.run_until_complete(main())
 client.run_until_disconnected()
